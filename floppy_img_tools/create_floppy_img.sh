@@ -1,22 +1,26 @@
 #!/bin/bash
 rm grub_boot_floppy.img
+rm floppy.img
+
+# Create a disk image that can boot to the Grub console
 dd if=stage1 of=grub_boot_floppy.img bs=512 count=1
 dd if=stage2 of=grub_boot_floppy.img bs=512 seek=1
 
-rm floppy.img
+# Create a disk image with the desired file structure
 dd if=/dev/zero of=floppy.img bs=1 count=1474560
 sudo losetup /dev/loop0 floppy.img
 sudo mkfs.minix /dev/loop0
 sudo fsck.minix /dev/loop0
 sudo mount /dev/loop0 -o loop /media/floppy0
 sudo mkdir /media/floppy0/boot
-sudo cp menu.lst /media/floppy0/boot/menu.lst
+sudo cp ../menu.lst /media/floppy0/boot/menu.lst
 sudo cp stage1 /media/floppy0/boot/stage1
 sudo cp stage2 /media/floppy0/boot/stage2
-sudo cp kernel.bin /media/floppy0/boot/kernel.bin
+sudo cp ../kernel.bin /media/floppy0/boot/kernel.bin
 sudo umount /media/floppy0
 sudo losetup -d /dev/loop0
 
+# Next step is to make the 2nd image bootable, which is a manual process
 echo "Now we need to install grub on the floppy disk image. This process is "
 echo "manually."
 echo "STEPS:"
