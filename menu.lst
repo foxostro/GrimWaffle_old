@@ -1,0 +1,4 @@
+default=0
+timeout=0
+title Grim Waffle
+	kernel (fd0)/boot/kernel.bin
