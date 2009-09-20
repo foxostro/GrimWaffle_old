@@ -7,10 +7,9 @@ $AS -o loader.o loader.s
 $CC -o kernel.o -c kernel.c -Wall -Werror -ansi -nostdlib -nostartfiles -nodefaultlibs
 $LD -T linker.ld -o kernel.bin loader.o kernel.o
 
-sudo losetup /dev/loop0 floppy.img
-sudo fsck.minix /dev/loop0
-sudo mount /dev/loop0 -o loop /media/floppy0
-sudo cp menu.lst /media/floppy0/boot/menu.lst
-sudo cp kernel.bin /media/floppy0/boot/kernel.bin
-sudo umount /media/floppy0
-sudo losetup -d /dev/loop0
+# Grab a clean disk image
+cp ./floppy_img_tools/floppy.img.backup ./floppy.img
+
+# Updating the disk image requires the loop device requires root.
+echo "Updating floppy.img through the loop device (need root for this)..."
+sudo bash ./floppy_img_tools/build_floppy_img.sh
