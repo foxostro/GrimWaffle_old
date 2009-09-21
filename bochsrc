@@ -1,5 +1,5 @@
 display_library: x, options="gui_debug"
 boot: floppy
-floppya: 1_44="floppy.img", status=inserted
+floppya: 1_44="bootfd.img", status=inserted
 port_e9_hack: enabled=1
 magic_break: enabled=1

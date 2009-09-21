@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -f ./opt/bin/bochs ] ; then
+	./opt/bin/bochs -q
+else 
+	echo "Please run the bootstrap script to build Bochs."
+	exit -1
+fi
