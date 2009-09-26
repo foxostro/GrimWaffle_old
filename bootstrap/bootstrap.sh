@@ -166,10 +166,9 @@ function get_gmp
 	lazy_fetch $URL $PKG $MD5
 	tar -xjvf $PKG
 	
-	# Build
-	pushd gmp-4.3.1
-	./configure --prefix=$PREFIX && make all && make check && make install
-	popd # gmp-4.3.1
+	# Move so we build with GCC
+	mkdir -p gcc-4.4.1
+	mv gmp-4.3.1 gcc-4.4.1/gmp
 }
 
 ##############################################################################
@@ -185,10 +184,9 @@ function get_mpfr
 	lazy_fetch $URL $PKG $MD5
 	tar -xjvf $PKG
 	
-	# Build
-	pushd mpfr-2.4.1
-	./configure --prefix=$PREFIX --with-gmp=$PREFIX && make all install
-	popd # mpfr-2.4.1
+	# Move so we build with GCC
+	mkdir -p gcc-4.4.1
+	mv mpfr-2.4.1 gcc-4.4.1/mpfr
 }
 
 ##############################################################################
@@ -210,9 +208,7 @@ function get_gcc
 	            --prefix=$PREFIX \
 				--disable-nls \
 				--enable-languages=c \
-				--without-headers \
-				--with-gmp=$PREFIX \
-				--with-mpfr=$PREFIX 
+				--without-headers
 	make all-gcc install-gcc
 	popd # gcc-4.4.1
 }
@@ -235,9 +231,7 @@ if [ "$1" == "--clean" ] ; then
 	rm -rf scons-1.2.0
 	rm -rf bochs-2.4.1
 	rm -rf binutils-2.19.1
-	rm -rf gmp-4.3.1
-	rm -rf mpfr-2.4.1
-	rm -rf gcc-core-4.4.1
+	rm -rf gcc-4.4.1
 	rm -rf "$PREFIX"
 	exit 0
 fi
@@ -246,11 +240,11 @@ fi
 mkdir -p $PREFIX
 
 # Now fetch, build, and install all of the repreqs.
-#get_scons
+get_scons
 get_bochs
-#get_binutils
-#get_gmp
-#get_mpfr
-#get_gcc
+get_binutils
+get_gmp
+get_mpfr
+get_gcc
 
 echo "Done. Prereqs installed in '$PREFIX'"
