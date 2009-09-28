@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -f ./opt/bin/scons ] ; then
+	exec ./opt/bin/scons $@
+else 
+	echo "Please run the bootstrap script to build Scons."
+	exit -1
+fi
