@@ -1,5 +1,18 @@
 display_library: x, options="gui_debug"
 boot: floppy
 floppya: 1_44="bootfd.img", status=inserted
+
+# Options useful for debugging the system
 port_e9_hack: enabled=1
 magic_break: enabled=1
+debugger_log: debugger.out
+log: bochsout.txt
+
+# We're running the kernel on a uniprocessor system
+cpu: count=1, ips=10000000, reset_on_triple_fault=0
+
+# Same amount of physical RAM as the Simics system in 15-410
+megs: 32
+
+# Adds a parallel port to the emulated machine. Prints to file.
+parport1: enabled=1, file="parport.out"
