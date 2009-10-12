@@ -49,8 +49,12 @@ void segment_descriptor_init(segment_descriptor_t * out,
 
 
 
-gdt_t * gdt_init(void);
+void gdt_init(void);
 
-#endif
 
-#endif
+void dump_gdt(void);
+
+
+#endif /* ASSEMBLER */
+
+#endif /* _SEG_H_ */
