@@ -1,5 +1,6 @@
 #include <multiboot.h>
 #include <assert.h>
+#include <asm.h>
 #include <seg.h>
 
 /* Macros. */
@@ -24,6 +25,13 @@ static int xpos;
 static int ypos;
 /* Point to the video memory. */
 static volatile unsigned char *video;
+
+/* This doesn't really describe the TSS layout, but it gives us easy access to
+ * the 16-bit TSS fields we actually do care about. (There are 2x of them.)
+ * This data is accessed by a few assembly helper routines in asm.S
+ */
+uint16_t tss[52] = {0};
+
 
 /* Forward declarations. */
 static void cls (void);
@@ -127,8 +135,14 @@ void kmain(multiboot_info_t * mbi, unsigned int magic)
 		}
 	}
 
-	/* initialize the GDT and the GDTR */
+	/* Initialize the GDT and the GDTR */
 	gdt_init();
+	
+	/* Initialize task state stuff in x86 hardware. */
+	tss[4] = SEGSEL_TSS; /* set the segment that the TSS is located within */
+	tss[51] = sizeof(tss); /* set so that a transition to Virtual-8086 mode will cause an immediate segmentation fault */
+	ltr(SEGSEL_TSS);
+
 }
 
 /* Clear the screen and initialize VIDEO, XPOS and YPOS. */

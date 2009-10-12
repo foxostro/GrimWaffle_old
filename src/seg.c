@@ -4,10 +4,17 @@
 
 extern void printf(const char *format, ...);
 
+extern void * tss; /* Defined in kernel.c. We just want the base address. */
+
 static gdt_t gdt;
 
-uint32_t init_tss[32] = {0}; /* TOTALLY BOGUS FAKE STUB */
 
+/* The segment descriptor format is disgusting, but it just has to be dealt
+ * with to deal with x86 segmented memory. This function can be used to fill
+ * out the bitfields for a segment descriptor in the GDT.
+ * See the Intel Manual, Volume 3, Chapter 2, Section 4 for details on each
+ * parameter. I'm using the same notation that the manual uses.
+ */
 void segment_descriptor_init(segment_descriptor_t * out,
                              uint32_t base_addr,
 							 uint32_t limit,
@@ -46,20 +53,42 @@ void segment_descriptor_init(segment_descriptor_t * out,
 			| ((base_addr & 0x00FF0000) >> 16);
 }
 
-gdt_t * gdt_init(void)
+
+/* Prints the contents of the GDT and other debugging informtation */
+void dump_gdt(void)
 {
 	int i;
-	
+
+	/* dump the GDT for our inspection */
+	for(i=0; i<6; ++i)
+	{
+		printf("gdt[%d] = { dl=0x%x, dh=0x%x }\n",
+		       i,
+			   gdt.segs[i].dl,
+			   gdt.segs[i].dh);
+	}
+
+	printf("gdt limit = %x\n", sizeof(gdt)-1);
+}
+
+
+/* Initializes and install the GDT. */
+void gdt_init(void)
+{
+	/* initialize the system segment we will use for the TSS structure */
+
 	segment_descriptor_init(&gdt.segs[SEGSEL_TSS_IDX],
-	                        0x100930,    /* base */
-							0x67,        /* limit */
-							0,           /* G*/
-							0,           /* DPL */
-							0x9,         /* Type = Execute-Only, Accessed */
-							0,           /* S */
-							0,           /* D/B */
-							1,           /* P */
-							0);          /* AVL */
+	                        (uint32_t)&tss, /* base */
+							sizeof(tss)-1,  /* limit */
+							0,
+							0,
+							0x9,
+							0,
+							0,
+							1,
+							0);
+
+	/* Now intialize the 4 segments we want to be able to use */
 
 	segment_descriptor_init(&gdt.segs[SEGSEL_KERNEL_CS_IDX],
 	                        0x00000000, /* base */
@@ -104,20 +133,12 @@ gdt_t * gdt_init(void)
 							1,          /* D/B */
 							1,          /* P */
 							0);         /* AVL */
-	/* dump the GDT for our inspection */
-	for(i=0; i<6; ++i)
-	{
-		printf("gdt[%d] = { dl=0x%x, dh=0x%x }\n",
-		       i,
-			   gdt.segs[i].dl,
-			   gdt.segs[i].dh);
-	}
 
-	printf("gdt limit = %x\n", sizeof(gdt)-1);
+# if 0
+	dump_gdt();
+#endif
 
 	/* Actually install the GDT here */
 	lgdt(&gdt, sizeof(gdt)-1);
-	
-	return &gdt;
 }
 

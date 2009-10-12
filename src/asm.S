@@ -140,19 +140,25 @@ set_cr4:
     movl %eax, %cr4
     ret
 
-.global init_tss
+.global tss
 
 # esp0 is not a register.  But we can pretend!
 .global get_esp0
 get_esp0:
-    leal init_tss, %eax
+    leal tss, %eax
     movl 4(%eax), %eax
     ret
 
 .global set_esp0
 set_esp0:
-    leal init_tss, %eax
+    leal tss, %eax
     movl 4(%esp), %ecx
     movl %ecx, 4(%eax)
     ret
 
+# Andrew Fox: So we can set the task register on boot, in C
+.global ltr
+ltr:
+	movl 4(%esp), %eax
+    ltr %ax
+	ret

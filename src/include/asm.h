@@ -37,4 +37,7 @@ void outw(uint16_t port, uint16_t val);
 /** @brief Writes 4 bytes to target port */
 void outd(uint16_t port, uint32_t val);
 
+/* Andrew Fox: So we can set the task register on boot, in C */
+void ltr(unsigned int segsel_tss);
+
 #endif /* !X86_ASM_H */
