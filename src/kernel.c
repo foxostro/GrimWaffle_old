@@ -1,4 +1,6 @@
 #include <multiboot.h>
+#include <assert.h>
+#include <seg.h>
 
 /* Macros. */
 
@@ -28,6 +30,7 @@ static void cls (void);
 static void itoa (char *buf, int base, int d);
 static void putchar (int c);
 void printf (const char *format, ...);
+
 
 void kmain(multiboot_info_t * mbi, unsigned int magic)
 {
@@ -123,6 +126,9 @@ void kmain(multiboot_info_t * mbi, unsigned int magic)
 			        (unsigned) mmap->type);
 		}
 	}
+
+	/* initialize the GDT and the GDTR */
+	gdt_init();
 }
 
 /* Clear the screen and initialize VIDEO, XPOS and YPOS. */

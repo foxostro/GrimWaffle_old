@@ -7,80 +7,72 @@ TARGET="i386-elf"
 
 ##############################################################################
 
-function check_md5
-{
-	PKG_FILE="$1"
-	MD5_FILE="$2"
-
-	if [ -f "$MD5_FILE" ] ; then
-		echo "MD5 file seems to be present"
-	else
-		echo "MD5 file seems to be missing: '$MD5_FILE'"
-		exit -1
-	fi
-
-	if [ -f "$PKG_FILE" ] ; then
-		echo "Going to check '$PKG_FILE'"
-	else
-		echo "File seems to be missing: '$PKG_FILE'"
-		return 1
-	fi
-
-	if [ `uname` == "Darwin" ] ; then
-		CALCULATED=`md5 -q "$PKG_FILE"`
-		EXPECTED=`sed -E 's/^([0-9a-f]+) .*$/\1/' "$MD5_FILE"`
-		
-		if [ "$CALCULATED" == "$EXPECTED" ] ; then
-			return 0
-		else
-			return 1
-		fi
-	else
-		md5sum --check "$MD5_FILE" --status
-		return $?
-	fi
-}
-
-##############################################################################
-
-function lazy_fetch
-{
-	URL="$1"
-	PKG_FILE="$2"
-	MD5_FILE="$3"
-	
-	# Have we already downloaded it already?
-	check_md5 "$PKG_FILE" "$MD5_FILE"
-
-	if [ $? -ne 0 ] ; then
-		echo "Downloading <$URL>..."
-		curl -O $URL
-		if [ $? -ne 0 ] ; then
-			echo "Failed to download file at <$URL>"
-			exit -1
-		fi
-
-		# Check the hash on the finished download
-		check_md5 "$PKG_FILE" "$MD5_FILE"
-		if [ $? -ne 0 ] ; then
-			echo "Downloaded '$PKG_FILE', but the MD5 hash looks WRONG."
-			exit -1
-		fi
-	else
-		echo "Already downloaded '$PKG_FILE' and the MD5 hash looks OK."
-	fi
-}
-
-##############################################################################
-
-function get_scons
+function fetch_scons
 {
 	URL=http://softlayer.dl.sourceforge.net/project/scons/scons/1.2.0/scons-1.2.0.tar.gz
+	MD5=53b6aa7281811717a57598e319441cf7
+	lazy_fetch $URL $MD5
+}
+
+##############################################################################
+
+function fetch_bochs
+{
+	URL=http://softlayer.dl.sourceforge.net/project/bochs/bochs/2.4.1/bochs-2.4.1.tar.gz
+	MD5=c9aaf4b99c868da7c9362bd8cd29a578
+	lazy_fetch $URL $MD5
+}
+
+##############################################################################
+
+function fetch_mtools
+{
+	URL=http://distfiles.macports.org/mtools/mtools-3.9.11.tar.gz
+	MD5=3c0ae05b0d98a5d3bd06d3d72fcaf80d
+	lazy_fetch $URL $MD5
+}
+
+##############################################################################
+
+function fetch_binutils
+{
+	URL=http://mirrors.kernel.org/gnu/binutils/binutils-2.19.1.tar.bz2
+	MD5=09a8c5821a2dfdbb20665bc0bd680791
+	lazy_fetch $URL $MD5
+}
+
+##############################################################################
+
+function fetch_gmp
+{
+	URL=ftp://ftp.gnu.org/gnu/gmp/gmp-4.3.1.tar.bz2
+	MD5=26cec15a90885042dd4a15c4003b08ae
+	lazy_fetch $URL $MD5
+}
+
+##############################################################################
+
+function fetch_mpfr
+{
+	URL=http://www.mpfr.org/mpfr-current/mpfr-2.4.1.tar.bz2
+	MD5=c5ee0a8ce82ad55fe29ac57edd35d09e
+	lazy_fetch $URL $MD5
+}
+
+##############################################################################
+
+function fetch_gcc
+{
+	URL=http://ftp.gnu.org/gnu/gcc/gcc-4.4.1/gcc-core-4.4.1.tar.bz2
+	MD5=d19693308aa6b2052e14c071111df59f
+	lazy_fetch $URL $MD5
+}
+
+##############################################################################
+
+function build_scons
+{
 	PKG=scons-1.2.0.tar.gz
-	MD5=md5s/scons-1.2.0.tar.gz.md5
-	
-	echo "Getting SCons 1.2.0"
-	lazy_fetch $URL $PKG $MD5
 	tar -xzvf $PKG
 	pushd scons-1.2.0
 	python setup.py install --prefix=$PREFIX
@@ -89,120 +81,123 @@ function get_scons
 	
 ##############################################################################
 
-function get_bochs
+function build_bochs
 {
-	URL=http://softlayer.dl.sourceforge.net/project/bochs/bochs/2.4.1/bochs-2.4.1.tar.gz
 	PKG=bochs-2.4.1.tar.gz
-	MD5=md5s/bochs-2.4.1.tar.gz.md5
-	
-	# Fetch and extract
-	echo "Getting Bochs 2.4.1"
-	lazy_fetch $URL $PKG $MD5
 	tar -xzvf $PKG
 	
 	# Build
 	pushd bochs-2.4.1
-	 ./configure --prefix=$PREFIX \
-	             --enable-smp \
-                 --enable-cpu-level=6 \
-                 --enable-acpi \
-                 --enable-all-optimizations \
-                 --enable-x86-64 \
-                 --enable-pci \
-                 --enable-apic \
-                 --enable-vmx \
-                 --enable-pae \
-                 --enable-large-pages \
-                 --enable-debugger \
-                 --enable-disasm \
-                 --enable-debugger-gui \
-                 --enable-logging \
-                 --enable-vbe \
-                 --enable-fpu \
-                 --enable-mmx \
-                 --enable-3dnow \
-                 --enable-sb16=dummy \
-                 --enable-sep \
-                 --enable-x86-debugger \
-                 --enable-iodebug \
-                 --disable-plugins \
-                 --disable-docbook \
-                 --with-x --with-x11 --with-term
+	if [ `uname` == "Darwin" ] ; then
+		./configure --prefix=$PREFIX \
+        		    --enable-smp \
+					--enable-cpu-level=6 \
+					--enable-acpi \
+					--enable-all-optimizations \
+					--enable-x86-64 \
+					--enable-pci \
+					--enable-apic \
+					--enable-vmx \
+					--enable-pae \
+					--enable-large-pages \
+					--enable-debugger \
+					--enable-disasm \
+					--enable-debugger-gui \
+					--enable-logging \
+					--enable-vbe \
+					--enable-fpu \
+					--enable-mmx \
+					--enable-3dnow \
+					--enable-sb16=dummy \
+					--enable-sep \
+					--enable-x86-debugger \
+					--enable-iodebug \
+					--disable-plugins \
+					--disable-docbook \
+					--with-term
+	else
+		./configure --prefix=$PREFIX \
+        		    --enable-smp \
+					--enable-cpu-level=6 \
+					--enable-acpi \
+					--enable-all-optimizations \
+					--enable-x86-64 \
+					--enable-pci \
+					--enable-apic \
+					--enable-vmx \
+					--enable-pae \
+					--enable-large-pages \
+					--enable-debugger \
+					--enable-disasm \
+					--enable-debugger-gui \
+					--enable-logging \
+					--enable-vbe \
+					--enable-fpu \
+					--enable-mmx \
+					--enable-3dnow \
+					--enable-sb16=dummy \
+					--enable-sep \
+					--enable-x86-debugger \
+					--enable-iodebug \
+					--disable-plugins \
+					--disable-docbook \
+					--with-x --with-x11 --with-term
+	fi
 	make all install
 	popd # bochs-2.4.1
 }
 
 ##############################################################################
 
-function get_binutils
+function build_binutils
 {
-	URL=http://mirrors.kernel.org/gnu/binutils/binutils-2.19.1.tar.bz2
 	PKG=binutils-2.19.1.tar.bz2
-	MD5=md5s/binutils-2.19.1.tar.bz2.md5
 	
-	# Fetch and extract
-	echo "Getting binutils-2.19.1"
-	lazy_fetch $URL $PKG $MD5
 	tar -xjvf $PKG
 	
-	# Build
 	pushd binutils-2.19.1
-	./configure --target=$TARGET --prefix=$PREFIX --disable-nls && \
-	  make && \
-	  make install
+	# Configure with --disable-werror so it builds on Mac OS X
+	./configure --target=$TARGET \
+	            --prefix=$PREFIX \
+	            --disable-nls \
+				--disable-werror
+	make
+	make install
 	popd # binutils-2.19.1
 }
 
 ##############################################################################
 
-function get_gmp
+function build_mtools
 {
-	URL=ftp://ftp.gnu.org/gnu/gmp/gmp-4.3.1.tar.bz2
-	PKG=gmp-4.3.1.tar.bz2
-	MD5=md5s/gmp-4.3.1.tar.bz2.md5
+	PKG=mtools-3.9.11.tar.gz
 	
-	# Fetch and extract
-	echo "Getting gmp-4.3.1"
-	lazy_fetch $URL $PKG $MD5
-	tar -xjvf $PKG
+	tar -xzvf $PKG
 	
-	# Move so we build with GCC
+	pushd mtools-3.9.11
+	./configure --prefix=$PREFIX
+	make
+	make install
+	popd # mtools-3.9.11
+}
+
+##############################################################################
+
+function build_gcc
+{
+	tar -xjvf gcc-core-4.4.1.tar.bz2
+	
+	# Get GMP
+	tar -xjvf gmp-4.3.1.tar.bz2
 	mkdir -p gcc-4.4.1
 	mv gmp-4.3.1 gcc-4.4.1/gmp
-}
-
-##############################################################################
-
-function get_mpfr
-{
-	URL=http://www.mpfr.org/mpfr-current/mpfr-2.4.1.tar.bz2
-	PKG=mpfr-2.4.1.tar.bz2
-	MD5=md5s/mpfr-2.4.1.tar.bz2.md5
 	
-	# Fetch and extract
-	echo "Getting mpfr-2.4.1"
-	lazy_fetch $URL $PKG $MD5
-	tar -xjvf $PKG
-	
-	# Move so we build with GCC
+	# Get MPFR
+	tar -xjvf mpfr-2.4.1.tar.bz2
 	mkdir -p gcc-4.4.1
 	mv mpfr-2.4.1 gcc-4.4.1/mpfr
-}
-
-##############################################################################
-
-function get_gcc
-{
-	URL=http://ftp.gnu.org/gnu/gcc/gcc-4.4.1/gcc-core-4.4.1.tar.bz2
-	PKG=gcc-core-4.4.1.tar.bz2
-	MD5=md5s/gcc-core-4.4.1.tar.bz2.md5
 	
-	# Fetch and extract
-	echo "Getting GCC 4.4.1"
-	lazy_fetch $URL $PKG $MD5
-	tar -xjvf $PKG
-	
-	# Build
+	# Build GCC
 	pushd gcc-4.4.1
 	./configure --target=$TARGET \
 	            --prefix=$PREFIX \
@@ -222,6 +217,14 @@ cd $WD
 
 # Option to just clean out all the work done bootstrapping.
 if [ "$1" == "--clean" ] ; then
+	# With clean, we DO NOT delete packages that were downloaded
+	rm -rf scons-1.2.0
+	rm -rf bochs-2.4.1
+	rm -rf binutils-2.19.1
+	rm -rf gcc-4.4.1
+	rm -rf "$PREFIX"
+	exit 0
+elif [ "$1" == "--purge" ] ; then
 	rm -f scons-1.2.0.tar.gz
 	rm -f bochs-2.4.1.tar.gz
 	rm -f binutils-2.19.1.tar.bz2
@@ -234,17 +237,24 @@ if [ "$1" == "--clean" ] ; then
 	rm -rf gcc-4.4.1
 	rm -rf "$PREFIX"
 	exit 0
+elif [ "$1" == "--fetch" ] ; then
+	fetch_scons
+	fetch_bochs
+	fetch_mtools
+	fetch_binutils
+	fetch_gmp
+	fetch_mpfr
+	fetch_gcc
+	echo "Done fetching packages"
+	exit 0
+elif [ "$1" == "--build" ] ; then
+	# We'll put prereq libraries in here
+	mkdir -p $PREFIX
+	build_scons
+	build_bochs
+	build_mtools
+	build_binutils
+	build_gcc
+	echo "Done. Prereqs installed in '$PREFIX'"
+	exit 0
 fi
-
-# We'll put prereq libraries in here
-mkdir -p $PREFIX
-
-# Now fetch, build, and install all of the repreqs.
-get_scons
-get_bochs
-get_binutils
-get_gmp
-get_mpfr
-get_gcc
-
-echo "Done. Prereqs installed in '$PREFIX'"
