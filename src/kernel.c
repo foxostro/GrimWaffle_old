@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <asm.h>
 #include <seg.h>
+#include <idt.h>
 
 /* Macros. */
 
@@ -137,6 +138,9 @@ void kmain(multiboot_info_t * mbi, unsigned int magic)
 
 	/* Initialize the GDT and the GDTR */
 	gdt_init();
+	
+	/* Initialize the IDT and install it. Do not specify any ISRs right now. */
+	idt_init();
 	
 	/* Initialize task state stuff in x86 hardware. */
 	tss[4] = SEGSEL_TSS; /* set the segment that the TSS is located within */
