@@ -4,6 +4,7 @@ import os
 src_files = ['src/boot.S',
 			 'src/kernel.c',
 			 'src/seg.c',
+			 'src/idt.c',
 			 'src/asm.S']
 bootfd_img = 'bootfd.img'
 kernel_bin = 'kernel.bin'
