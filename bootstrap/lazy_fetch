@@ -1,0 +1,28 @@
+#!/bin/sh
+URL="$1"
+MD5="$2"
+
+PKG_FILE=`echo "$URL" | sed -E 's/^((.*\/)+)(.*)$/\3/'`
+
+# Have we already downloaded it already?
+./check_md5 "$PKG_FILE" "$MD5"
+
+if [ $? -ne 0 ] ; then
+	echo "Downloading <$URL>..."
+	curl -O $URL
+	if [ $? -ne 0 ] ; then
+		echo "Failed to download file at <$URL>"
+		exit 1 # Error
+	fi
+
+	# Check the hash on the finished download
+	check_md5 "$PKG_FILE" "$MD5_FILE"
+	if [ $? -ne 0 ] ; then
+		echo "Downloaded '$PKG_FILE', but the MD5 hash looks WRONG."
+		exit 1 # Error
+	fi
+else
+	echo "Already downloaded '$PKG_FILE' and the MD5 hash looks OK."
+fi
+
+exit 0 # Success
