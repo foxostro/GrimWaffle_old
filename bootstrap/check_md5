@@ -1,0 +1,17 @@
+#!/bin/bash
+# Verifies the MD5 signature for a given file.
+PKG_FILE="$1"
+MD5="$2"
+
+if [ ! -f "$PKG_FILE" ] ; then
+	echo "File seems to be missing: '$PKG_FILE'"
+	exit 1 # Fail
+fi
+
+if [ `md5 -q "$PKG_FILE"` == "$MD5" ] ; then
+	echo "File '$PKG_FILE' matches checksum"
+	exit 0 # Success
+else
+	echo "File '$PKG_FILE' does NOT match checksum"
+	exit 1 # Fail
+fi
