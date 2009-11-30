@@ -1,17 +1,18 @@
-#!/bin/bash
-# Verifies the MD5 signature for a given file.
-PKG_FILE="$1"
-MD5="$2"
+#!/usr/bin/ruby -w
+require 'digest/md5'
 
-if [ ! -f "$PKG_FILE" ] ; then
-	echo "File seems to be missing: '$PKG_FILE'"
-	exit 1 # Fail
-fi
+$PKG_FILE=ARGV[0]
+$EXPECTED_DIGEST=ARGV[1]
 
-if [ `md5 -q "$PKG_FILE"` == "$MD5" ] ; then
-	echo "File '$PKG_FILE' matches checksum"
-	exit 0 # Success
+digest = Digest::MD5.hexdigest( File.read($PKG_FILE) )
+
+if digest == $EXPECTED_DIGEST then
+	print "File #{$PKG_FILE} matches checksum\n"
+	exit 0
 else
-	echo "File '$PKG_FILE' does NOT match checksum"
-	exit 1 # Fail
-fi
+	print "File #{$PKG_FILE} does NOT match checksum\n"
+	exit 1
+end
+
+__END__
+
