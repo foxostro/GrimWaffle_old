@@ -54,7 +54,7 @@ function fetch_gmp
 
 function fetch_mpfr
 {
-	URL=http://www.mpfr.org/mpfr-current/mpfr-2.4.1.tar.bz2
+	URL=http://www.mpfr.org/mpfr-2.4.1/mpfr-2.4.1.tar.bz2
 	MD5=c5ee0a8ce82ad55fe29ac57edd35d09e
 	lazy_fetch $URL $MD5
 }
@@ -222,6 +222,7 @@ if [ "$1" == "--clean" ] ; then
 	rm -rf bochs-2.4.1
 	rm -rf binutils-2.19.1
 	rm -rf gcc-4.4.1
+	rm -rf mtools-3.9.11
 	rm -rf "$PREFIX"
 	exit 0
 elif [ "$1" == "--purge" ] ; then
@@ -231,10 +232,12 @@ elif [ "$1" == "--purge" ] ; then
 	rm -f gmp-4.3.1.tar.bz2
 	rm -f mpfr-2.4.1.tar.bz2
 	rm -f gcc-core-4.4.1.tar.bz2
+	rm -f mtools-3.9.11.tar.gz
 	rm -rf scons-1.2.0
 	rm -rf bochs-2.4.1
 	rm -rf binutils-2.19.1
 	rm -rf gcc-4.4.1
+	rm -rf mtools-3.9.11
 	rm -rf "$PREFIX"
 	exit 0
 elif [ "$1" == "--fetch" ] ; then
