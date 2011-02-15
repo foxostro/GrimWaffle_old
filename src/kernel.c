@@ -36,9 +36,14 @@ uint16_t tss[52] = {0};
 
 /* Forward declarations. */
 static void cls (void);
+
+#ifndef UNIT_TEST
 static void itoa (char *buf, int base, int d);
 static void putchar (int c);
 void printf (const char *format, ...);
+#else
+extern int printf(const char * format, ...);
+#endif
 
 
 void kmain(multiboot_info_t * mbi, unsigned int magic)
@@ -149,6 +154,7 @@ void kmain(multiboot_info_t * mbi, unsigned int magic)
 
 }
 
+
 /* Clear the screen and initialize VIDEO, XPOS and YPOS. */
 static void
 cls (void)
@@ -164,9 +170,11 @@ cls (void)
 	ypos = 0;
 }
 
+
 /* Convert the integer D to a string and save the string in BUF. If
    BASE is equal to 'd', interpret that D is decimal, and if BASE is
    equal to 'x', interpret that D is hexadecimal. */
+#ifndef UNIT_TEST
 static void
 itoa (char *buf, int base, int d)
 {
@@ -204,8 +212,11 @@ itoa (char *buf, int base, int d)
 		p2--;
 	}
 }
+#endif
+
 
 /* Put the character C on the screen. */
+#ifndef UNIT_TEST
 static void
 putchar (int c)
 {
@@ -225,9 +236,12 @@ newline:
 	if (xpos >= COLUMNS)
 		goto newline;
 }
+#endif
+
 
 /* Format a string and print it on the screen, just like the libc
    function printf. */
+#ifndef UNIT_TEST
 void
 printf (const char *format, ...)
 {
@@ -270,3 +284,5 @@ string:
 		}
 	}
 }
+#endif
+

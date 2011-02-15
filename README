@@ -3,3 +3,12 @@ popular GPLv3 license. Please see the LICENSE file for details.
 Copyright (c) 2009,2010,2011 Andrew Fox. All rights reserved.
 
 Note: Tested on Mac OS X 10.6.6 with MacPorts's i386-elf compiler and mtools binaries.
+
+Unit Tests
+==========
+Unit tests require CUnit to run. Get it here: <http://cunit.sourceforge.net/>
+Do note that the MacPorts version of CUnit is broken as of 2011-02-14.
+Run unit tests through the scons build system as follows:
+
+    % scons check
+

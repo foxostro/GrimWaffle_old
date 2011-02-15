@@ -19,9 +19,12 @@ src_test_files = src_c_files + ['src/test_mock_asm.c', 'src/test.c']
 
 if 'check' in COMMAND_LINE_TARGETS:
     # Units tests
-    env = DefaultEnvironment()
+    env = Environment(ENV=os.environ)
     env['CPPPATH']='src/include'
-    test = env.Program(target = "test", source = src_test_files)
+    env['CFLAGS'] = "-ansi -Wall -Werror -DUNIT_TEST -fno-builtin"
+    test = env.Program(target = "test",
+                       LIBS=['cunit'],
+                       source = src_test_files)
     env.Alias('check', test)
     env.AlwaysBuild(test)
     env.AddPostAction(test, "./test")
