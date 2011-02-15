@@ -1,3 +1,5 @@
 GrimWaffle is free software that may be distributed under the terms of the
 popular GPLv3 license. Please see the LICENSE file for details.
-Copyright (c) 2009 Andrew Fox. All rights reserved.
+Copyright (c) 2009,2010,2011 Andrew Fox. All rights reserved.
+
+Note: Tested on Mac OS X 10.6.6 with MacPorts's i386-elf compiler and mtools binaries.
