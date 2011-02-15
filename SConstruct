@@ -11,9 +11,7 @@ kernel_bin = 'kernel.bin'
 
 build_img = Builder(action = './build_img.sh $SOURCE $TARGET')
 env = Environment(ENV=os.environ, BUILDERS = {'BuildImg' : build_img})
-env['CC'] = './opt/bin/i386-elf-gcc'
-env['AS'] = './opt/bin/i386-elf-as'
-env['LD'] = './opt/bin/i386-elf-ld'
+env['CC'] = '/opt/local/bin/i386-elf-gcc-4.3.2'
 env['CPPPATH']='src/include'
 env['CFLAGS'] = "-ansi -Wall -Werror -nostdlib -nostartfiles -nodefaultlibs -fno-builtin"
 env['LINKFLAGS'] = "-T linker.ld -nostdlib -nostartfiles"

@@ -3,7 +3,7 @@
 # Parameter $1 -- The name of the kernel binary image
 # Parameter $2 -- The name of the boot disk image (output)
 
-MCOPY=./opt/bin/mcopy
+MCOPY=/opt/local/bin/mcopy
 
 # We'd like to use a compressed kernel image
 gzip -c "$1" > "$1.gz"
