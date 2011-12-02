@@ -25,17 +25,20 @@ if 'check' in COMMAND_LINE_TARGETS:
     test = env.Program(target = "test",
                        LIBS=['cunit'],
                        source = src_test_files)
-    env.Alias('check', test)
     env.AlwaysBuild(test)
-    env.AddPostAction(test, "./test")
+
+    # If we run ./test with AddPostAction() then scons reports a false
+    # dependency cycle. Instead, invoke from a target that depends on ./test
+    check = env.Command("check", test, test[0].abspath)
+    env.Depends(check, test)
 else:
     # The kernel itself
     build_img = Builder(action = './build_img.sh $SOURCE $TARGET')
     env = Environment(BUILDERS = {'BuildImg' : build_img})
-    env['CC'] = '/opt/local/bin/i386-elf-gcc-4.3.2'
     env['CPPPATH']='src/include'
-    env['CFLAGS'] = "-ansi -Wall -Werror -nostdlib -nostartfiles -nodefaultlibs -fno-builtin"
-    env['LINKFLAGS'] = "-T linker.ld -nostdlib -nostartfiles"
+    env['CFLAGS'] = "-m32 -ansi -Wall -Werror -nostdlib -nostartfiles -nodefaultlibs -fno-builtin"
+    env['ASFLAGS'] = "-m32 -Wall -Werror -nostdlib -nostartfiles -nodefaultlibs -fno-builtin"
+    env['LINKFLAGS'] = "-melf -m32 -T linker.ld -nostdlib -nostartfiles"
     env.Program(target = kernel_bin, source = src_files)
     env.BuildImg(bootfd_img, kernel_bin)
 
